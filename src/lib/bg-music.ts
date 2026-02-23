@@ -21,7 +21,7 @@ const createReverbIR = (ctx: AudioContext, duration = 2.5, decay = 2.0): AudioBu
   return buffer;
 };
 
-const TEMPO = 72; // slower, dreamy BPM
+const TEMPO = 56; // very slow, meditative
 const NOTE_DUR = 60 / TEMPO;
 
 // Musical notes (Hz) – using minor/lydian tonalities for night magic
@@ -36,41 +36,54 @@ const N: Record<string, number> = {
   R: 0,
 };
 
-// Main melody – nocturnal, wistful, tender
+// Main melody – gentle, lullaby-like, major key warmth
 const melody: [string, number][] = [
-  ["Eb4", 1.5], ["G4", 0.5], ["Bb4", 2], ["Ab4", 1], ["G4", 1],
-  ["Eb4", 1.5], ["F4", 0.5], ["G4", 2], ["R", 2],
-  ["Ab4", 1.5], ["Bb4", 0.5], ["C5", 2], ["Bb4", 1], ["Ab4", 1],
-  ["G4", 1.5], ["F4", 0.5], ["Eb4", 2], ["R", 2],
-  ["C5", 1.5], ["Bb4", 0.5], ["Ab4", 1], ["G4", 1], ["Eb4", 1.5], ["F4", 0.5],
-  ["G4", 3], ["R", 1],
-  ["Ab4", 1], ["Bb4", 1], ["C5", 1.5], ["Eb5", 0.5],
-  ["D5", 2], ["C5", 1], ["Bb4", 1],
-  ["Ab4", 1.5], ["G4", 0.5], ["Eb4", 2], ["R", 2],
+  ["G4", 2], ["A4", 1], ["B4", 1], ["D5", 3], ["R", 1],
+  ["C5", 2], ["B4", 1], ["A4", 1], ["G4", 3], ["R", 1],
+  ["A4", 1.5], ["B4", 0.5], ["C5", 2], ["E5", 2], ["D5", 2],
+  ["C5", 1], ["B4", 1], ["A4", 2], ["G4", 2],
+  ["R", 2],
+  ["E4", 2], ["G4", 1], ["A4", 1], ["B4", 3], ["R", 1],
+  ["A4", 2], ["G4", 1], ["E4", 1], ["D4", 3], ["R", 1],
+  ["E4", 1.5], ["G4", 0.5], ["A4", 2], ["B4", 2], ["A4", 2],
+  ["G4", 4],
+  ["R", 2],
 ];
 
-// Bass – slow arpeggios, Cm / Ab / Eb / Bb progression
+// Bass – very slow, warm root notes with gentle movement
 const bass: [string, number][] = [
-  ["C3", 2], ["G3", 2], ["Eb3", 2], ["G3", 2],
-  ["Ab3", 2], ["Eb3", 2], ["Ab3", 2], ["Eb3", 2],
-  ["Bb3", 2], ["F3", 2], ["Bb3", 2], ["F3", 2],
-  ["Eb3", 2], ["Bb3", 2], ["Eb3", 2], ["G3", 2],
-  ["C3", 2], ["G3", 2], ["Eb3", 2], ["G3", 2],
-  ["Ab3", 2], ["Eb3", 2], ["Ab3", 2], ["Eb3", 2],
-  ["Bb3", 2], ["F3", 2], ["Bb3", 2], ["F3", 2],
-  ["Eb3", 2], ["Bb3", 2], ["G3", 2], ["R", 2],
+  ["G3", 4], ["D3", 4],
+  ["C3", 4], ["G3", 4],
+  ["A3", 4], ["E3", 4],
+  ["D3", 4], ["G3", 4],
+  ["G3", 4], ["D3", 4],
+  ["C3", 4], ["G3", 4],
+  ["A3", 4], ["D3", 4],
+  ["G3", 4], ["R", 4],
 ];
 
-// Shimmer pad – high ethereal notes like starlight
+// Shimmer – very high, barely audible sparkle like distant chimes
 const shimmer: [string, number][] = [
-  ["Eb5", 4], ["R", 4],
-  ["C5", 4], ["R", 4],
-  ["Bb4", 4], ["R", 4],
-  ["G4", 4], ["R", 4],
-  ["Eb5", 4], ["R", 4],
-  ["Ab4", 4], ["R", 4],
-  ["Bb4", 4], ["R", 4],
-  ["G4", 4], ["R", 4],
+  ["D5", 3], ["R", 5],
+  ["G5", 3], ["R", 5],
+  ["E5", 3], ["R", 5],
+  ["B4", 3], ["R", 5],
+  ["D5", 3], ["R", 5],
+  ["A5", 3], ["R", 5],
+  ["G5", 3], ["R", 5],
+  ["D5", 3], ["R", 5],
+];
+
+// Harmony pad – sustained chords, very soft
+const pad: [string, number][] = [
+  ["B4", 8],
+  ["E4", 8],
+  ["G4", 8],
+  ["Fs4", 8],
+  ["B4", 8],
+  ["E4", 8],
+  ["Fs4", 8],
+  ["G4", 8],
 ];
 
 const playNote = (
@@ -88,40 +101,48 @@ const playNote = (
   osc.type = type;
   osc.frequency.setValueAtTime(freq, startTime);
 
-  // Soft, dreamy envelope with slow attack and long release
+  // Very gentle envelope – slow attack, long sustain, smooth fade
+  const attack = Math.min(0.15, duration * 0.15);
   gain.gain.setValueAtTime(0, startTime);
-  gain.gain.linearRampToValueAtTime(volume, startTime + 0.08);
-  gain.gain.setValueAtTime(volume * 0.8, startTime + duration * 0.5);
+  gain.gain.linearRampToValueAtTime(volume, startTime + attack);
+  gain.gain.setValueAtTime(volume * 0.7, startTime + duration * 0.6);
   gain.gain.exponentialRampToValueAtTime(0.001, startTime + duration);
 
   osc.connect(gain);
   gain.connect(dest);
   osc.start(startTime);
-  osc.stop(startTime + duration);
+  osc.stop(startTime + duration + 0.05);
 };
 
 const scheduleLoop = (ctx: AudioContext, master: GainNode) => {
   const startTime = ctx.currentTime + 0.1;
 
-  // Melody – triangle for warmth
+  // Melody – triangle wave, very soft and warm
   let t = startTime;
   for (const [note, beats] of melody) {
-    playNote(ctx, master, N[note], t, beats * NOTE_DUR * 0.92, "triangle", 0.08);
+    playNote(ctx, master, N[note], t, beats * NOTE_DUR * 0.95, "triangle", 0.055);
     t += beats * NOTE_DUR;
   }
 
-  // Bass – sine for deep, round tone
+  // Bass – sine wave, deep and round
   let tb = startTime;
   for (const [note, beats] of bass) {
-    playNote(ctx, master, N[note], tb, beats * NOTE_DUR * 0.85, "sine", 0.05);
+    playNote(ctx, master, N[note], tb, beats * NOTE_DUR * 0.9, "sine", 0.04);
     tb += beats * NOTE_DUR;
   }
 
-  // Shimmer pad – sine, very soft, like distant stars
+  // Shimmer – sine, barely there, like tiny bells
   let ts = startTime;
   for (const [note, beats] of shimmer) {
-    playNote(ctx, master, N[note], ts, beats * NOTE_DUR * 0.95, "sine", 0.025);
+    playNote(ctx, master, N[note], ts, beats * NOTE_DUR * 0.95, "sine", 0.015);
     ts += beats * NOTE_DUR;
+  }
+
+  // Pad – triangle, ultra soft sustained harmony
+  let tp = startTime;
+  for (const [note, beats] of pad) {
+    playNote(ctx, master, N[note], tp, beats * NOTE_DUR * 0.98, "triangle", 0.02);
+    tp += beats * NOTE_DUR;
   }
 
   const loopDuration = t - startTime;
