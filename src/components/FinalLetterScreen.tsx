@@ -91,7 +91,7 @@ Tu pollito💗`;
           <div className="relative flex justify-center gap-6 min-h-[80px]">
             <button
               onClick={handleYes}
-              className="font-pixel text-xs px-5 py-2 bg-primary text-primary-foreground rounded animate-pulse-glow z-10"
+              className="font-pixel text-[10px] px-6 py-1.5 bg-primary text-primary-foreground rounded animate-pulse-glow z-10"
             >
               Sí
             </button>
@@ -99,7 +99,7 @@ Tu pollito💗`;
               ref={noRef}
               onMouseEnter={handleNoHover}
               onTouchStart={handleNoHover}
-              className="font-pixel text-xs px-5 py-2 bg-secondary text-secondary-foreground rounded border border-border transition-all z-10"
+              className="font-pixel text-[10px] px-6 py-1.5 bg-secondary text-secondary-foreground rounded border border-border transition-all z-10"
             >
               No
             </button>
