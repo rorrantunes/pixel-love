@@ -24,13 +24,11 @@ Tu pollito💗`;
     if (!noRef.current) return;
     retroSounds.wrong();
     const btn = noRef.current;
-    const parent = btn.parentElement;
-    if (!parent) return;
-    const maxX = parent.clientWidth - btn.clientWidth;
-    const maxY = parent.clientHeight - btn.clientHeight;
-    btn.style.position = "absolute";
-    btn.style.left = `${Math.random() * maxX}px`;
-    btn.style.top = `${Math.random() * maxY}px`;
+    const maxX = window.innerWidth - btn.clientWidth - 20;
+    const maxY = window.innerHeight - btn.clientHeight - 20;
+    btn.style.position = "fixed";
+    btn.style.left = `${20 + Math.random() * maxX}px`;
+    btn.style.top = `${20 + Math.random() * maxY}px`;
   }, []);
 
   const handleYes = () => {
