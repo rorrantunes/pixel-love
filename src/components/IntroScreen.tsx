@@ -38,7 +38,7 @@ const IntroScreen = ({ onStart }: Props) => {
 
       <button
         onClick={handleStart}
-        className="font-pixel text-sm sm:text-base px-8 py-4 bg-primary text-primary-foreground rounded-lg animate-pulse-glow hover:brightness-110 transition-all"
+        className="font-pixel text-sm sm:text-base px-8 py-4 bg-primary text-primary-foreground rounded-lg animate-bounce hover:brightness-110 transition-all"
       >
         Start Game
       </button>
