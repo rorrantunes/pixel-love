@@ -88,10 +88,10 @@ Tu pollito💗`;
             ¿Estás dispuesto a empezar el Nivel 3 conmigo?
           </p>
 
-          <div className="relative flex justify-center gap-6 min-h-[80px]">
+          <div className="relative flex justify-center gap-4 min-h-[60px]">
             <button
               onClick={handleYes}
-              className="font-pixel text-[10px] px-8 py-1 leading-none bg-primary text-primary-foreground rounded animate-pulse-glow z-10"
+              className="font-pixel text-xs sm:text-sm px-10 sm:px-14 py-3 bg-primary text-primary-foreground rounded-xl animate-pulse-glow z-10"
             >
               Sí
             </button>
@@ -99,7 +99,7 @@ Tu pollito💗`;
               ref={noRef}
               onMouseEnter={handleNoHover}
               onTouchStart={handleNoHover}
-              className="font-pixel text-[10px] px-8 py-1 leading-none bg-secondary text-secondary-foreground rounded border border-border transition-all z-10"
+              className="font-pixel text-xs sm:text-sm px-10 sm:px-14 py-3 bg-secondary text-secondary-foreground rounded-xl border border-border transition-all z-10"
             >
               No
             </button>
