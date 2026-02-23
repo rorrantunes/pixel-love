@@ -41,6 +41,7 @@ interface Ghost {
 const PacManScreen = ({ onComplete }: Props) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [caught, setCaught] = useState(false);
+  const caughtRef = useRef(false);
   const gameRef = useRef({
     px: 1, py: 1,
     ghosts: [] as Ghost[],
@@ -60,6 +61,7 @@ const PacManScreen = ({ onComplete }: Props) => {
       color,
       dir: i,
     }));
+    caughtRef.current = false;
     setCaught(false);
   }, []);
 
@@ -100,7 +102,7 @@ const PacManScreen = ({ onComplete }: Props) => {
     const DIRS = [[0,-1],[1,0],[0,1],[-1,0]];
 
     const loop = () => {
-      if (g.won || caught) { frame = requestAnimationFrame(loop); return; }
+      if (g.won || caughtRef.current) { frame = requestAnimationFrame(loop); return; }
 
       g.moveTimer++;
       if (g.moveTimer >= 8) {
@@ -143,6 +145,7 @@ const PacManScreen = ({ onComplete }: Props) => {
           }
 
           if (ghost.x === g.px && ghost.y === g.py) {
+            caughtRef.current = true;
             setCaught(true);
           }
         }
@@ -150,7 +153,10 @@ const PacManScreen = ({ onComplete }: Props) => {
 
       // Check collision after player move too
       for (const ghost of g.ghosts) {
-        if (ghost.x === g.px && ghost.y === g.py) setCaught(true);
+        if (ghost.x === g.px && ghost.y === g.py) {
+          caughtRef.current = true;
+          setCaught(true);
+        }
       }
 
       // Draw
@@ -222,7 +228,7 @@ const PacManScreen = ({ onComplete }: Props) => {
       window.removeEventListener("keydown", onKeyDown);
       window.removeEventListener("keyup", onKeyUp);
     };
-  }, [caught, onComplete]);
+  }, [onComplete]);
 
   // Mobile controls
   const g = gameRef.current;
