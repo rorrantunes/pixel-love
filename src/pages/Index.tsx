@@ -1,11 +1,34 @@
-// Update this page (the content is just a fallback if you fail to update the page)
+import { useState, useCallback } from "react";
+import StarryBackground from "@/components/StarryBackground";
+import IntroScreen from "@/components/IntroScreen";
+import QuizScreen from "@/components/QuizScreen";
+import PlatformerScreen from "@/components/PlatformerScreen";
+import PacManScreen from "@/components/PacManScreen";
+import FinalLetterScreen from "@/components/FinalLetterScreen";
+
+type Screen = "intro" | "quiz" | "platformer" | "pacman" | "letter";
 
 const Index = () => {
+  const [screen, setScreen] = useState<Screen>("intro");
+  const [transitioning, setTransitioning] = useState(false);
+
+  const goTo = useCallback((next: Screen) => {
+    setTransitioning(true);
+    setTimeout(() => {
+      setScreen(next);
+      setTransitioning(false);
+    }, 600);
+  }, []);
+
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background">
-      <div className="text-center">
-        <h1 className="mb-4 text-4xl font-bold">Welcome to Your Blank App</h1>
-        <p className="text-xl text-muted-foreground">Start building your amazing project here!</p>
+    <div className="relative min-h-screen overflow-hidden bg-background">
+      <StarryBackground />
+      <div className={transitioning ? "animate-fade-screen-out" : "animate-fade-screen-in"}>
+        {screen === "intro" && <IntroScreen onStart={() => goTo("quiz")} />}
+        {screen === "quiz" && <QuizScreen onComplete={() => goTo("platformer")} />}
+        {screen === "platformer" && <PlatformerScreen onComplete={() => goTo("pacman")} />}
+        {screen === "pacman" && <PacManScreen onComplete={() => goTo("letter")} />}
+        {screen === "letter" && <FinalLetterScreen />}
       </div>
     </div>
   );
