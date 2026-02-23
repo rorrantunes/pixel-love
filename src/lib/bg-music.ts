@@ -1,8 +1,25 @@
-// Nocturnal romantic chiptune – moonlit love theme
+// Nocturnal romantic chiptune – moonlit love theme with reverb
 let audioCtx: AudioContext | null = null;
 let isPlaying = false;
 let stopFlag = false;
 let masterGain: GainNode | null = null;
+let reverbNode: ConvolverNode | null = null;
+let dryGain: GainNode | null = null;
+let wetGain: GainNode | null = null;
+
+// Build an impulse response for a soft, dreamy reverb
+const createReverbIR = (ctx: AudioContext, duration = 2.5, decay = 2.0): AudioBuffer => {
+  const rate = ctx.sampleRate;
+  const length = rate * duration;
+  const buffer = ctx.createBuffer(2, length, rate);
+  for (let ch = 0; ch < 2; ch++) {
+    const data = buffer.getChannelData(ch);
+    for (let i = 0; i < length; i++) {
+      data[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / length, decay);
+    }
+  }
+  return buffer;
+};
 
 const TEMPO = 72; // slower, dreamy BPM
 const NOTE_DUR = 60 / TEMPO;
@@ -122,9 +139,30 @@ export const bgMusic = {
     try {
       if (!audioCtx) audioCtx = new AudioContext();
       const ctx = audioCtx;
+
+      // Master gain
       masterGain = ctx.createGain();
       masterGain.gain.setValueAtTime(0.6, ctx.currentTime);
-      masterGain.connect(ctx.destination);
+
+      // Reverb chain: dry + wet mix
+      dryGain = ctx.createGain();
+      dryGain.gain.setValueAtTime(0.65, ctx.currentTime);
+
+      wetGain = ctx.createGain();
+      wetGain.gain.setValueAtTime(0.35, ctx.currentTime);
+
+      reverbNode = ctx.createConvolver();
+      reverbNode.buffer = createReverbIR(ctx, 2.8, 1.8);
+
+      // Routing: master → dry → destination
+      //          master → reverb → wet → destination
+      masterGain.connect(dryGain);
+      dryGain.connect(ctx.destination);
+
+      masterGain.connect(reverbNode);
+      reverbNode.connect(wetGain);
+      wetGain.connect(ctx.destination);
+
       isPlaying = true;
       stopFlag = false;
       scheduleLoop(ctx, masterGain);
