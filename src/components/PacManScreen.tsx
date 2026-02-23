@@ -1,4 +1,6 @@
 import { useEffect, useRef, useState, useCallback } from "react";
+import player1Src from "@/assets/player1-novio.png";
+import player2Src from "@/assets/player2-vale.png";
 
 interface Props {
   onComplete: () => void;
@@ -70,6 +72,11 @@ const PacManScreen = ({ onComplete }: Props) => {
     if (!canvas) return;
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
+
+    const player1Img = new Image();
+    player1Img.src = player1Src;
+    const player2Img = new Image();
+    player2Img.src = player2Src;
 
     const W = COLS * CELL;
     const H = ROWS * CELL;
@@ -157,35 +164,53 @@ const PacManScreen = ({ onComplete }: Props) => {
             ctx.strokeRect(c * CELL, r * CELL, CELL, CELL);
           }
           if (MAP[r][c] === 3) {
-            ctx.font = `${CELL - 4}px serif`;
-            ctx.fillText("💕", c * CELL + 2, r * CELL + CELL - 4);
+            // Draw Player 2 (Vale) as goal
+            if (player2Img.complete) {
+              ctx.drawImage(player2Img, c * CELL - 4, r * CELL - 4, CELL + 8, CELL + 8);
+            }
           }
         }
       }
 
-      // Player (Pac-Man style)
-      ctx.fillStyle = "hsl(50, 90%, 60%)";
-      ctx.beginPath();
-      const cx = g.px * CELL + CELL / 2;
-      const cy = g.py * CELL + CELL / 2;
-      ctx.arc(cx, cy, CELL / 2 - 2, 0.2 * Math.PI, 1.8 * Math.PI);
-      ctx.lineTo(cx, cy);
-      ctx.fill();
+      // Player (Player 1 image)
+      if (player1Img.complete) {
+        ctx.drawImage(player1Img, g.px * CELL - 4, g.py * CELL - 4, CELL + 8, CELL + 8);
+      }
 
-      // Ghosts
+      // Ghosts (classic Pac-Man shape)
       for (const ghost of g.ghosts) {
+        const gx = ghost.x * CELL + CELL / 2;
+        const gy = ghost.y * CELL + CELL / 2;
+        const r = CELL / 2 - 2;
+
         ctx.fillStyle = ghost.color;
-        const gx = ghost.x * CELL + 2;
-        const gy = ghost.y * CELL + 2;
-        const gs = CELL - 4;
-        ctx.fillRect(gx, gy, gs, gs);
+        ctx.beginPath();
+        // Head (semicircle)
+        ctx.arc(gx, gy - 2, r, Math.PI, 0);
+        // Body sides
+        ctx.lineTo(gx + r, gy + r - 2);
+        // Wavy bottom
+        const waves = 3;
+        const waveW = (r * 2) / waves;
+        for (let i = 0; i < waves; i++) {
+          const wx = gx + r - i * waveW;
+          ctx.quadraticCurveTo(wx - waveW * 0.25, gy + r + 3, wx - waveW * 0.5, gy + r - 2);
+          ctx.quadraticCurveTo(wx - waveW * 0.75, gy + r - 7, wx - waveW, gy + r - 2);
+        }
+        ctx.closePath();
+        ctx.fill();
+
         // Eyes
         ctx.fillStyle = "#fff";
-        ctx.fillRect(gx + 4, gy + 4, 5, 5);
-        ctx.fillRect(gx + gs - 9, gy + 4, 5, 5);
+        ctx.beginPath();
+        ctx.arc(gx - 3, gy - 3, 3, 0, Math.PI * 2);
+        ctx.arc(gx + 3, gy - 3, 3, 0, Math.PI * 2);
+        ctx.fill();
         ctx.fillStyle = "#222";
-        ctx.fillRect(gx + 6, gy + 6, 2, 2);
-        ctx.fillRect(gx + gs - 7, gy + 6, 2, 2);
+        ctx.beginPath();
+        ctx.arc(gx - 2, gy - 2, 1.5, 0, Math.PI * 2);
+        ctx.arc(gx + 4, gy - 2, 1.5, 0, Math.PI * 2);
+        ctx.fill();
       }
 
       frame = requestAnimationFrame(loop);
