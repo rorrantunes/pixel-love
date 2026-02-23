@@ -53,10 +53,18 @@ const Index = () => {
       {/* Music toggle button */}
       <button
         onClick={toggleMusic}
-        className="fixed top-4 left-4 z-50 font-pixel text-lg px-3 py-2 bg-secondary/80 backdrop-blur-sm rounded-lg border border-border text-foreground/70 hover:text-foreground transition-colors"
+        className="fixed top-4 left-4 z-50 group flex items-center gap-1.5 font-pixel text-xs px-3 py-2 bg-secondary/60 backdrop-blur-md rounded-full border border-border/50 text-foreground/60 hover:text-foreground hover:bg-secondary/80 hover:border-primary/30 transition-all duration-300"
         title={musicOn ? "Silenciar música" : "Activar música"}
       >
-        {musicOn ? "♫" : "♪"}
+        <span className={`inline-block transition-transform duration-500 ${musicOn ? "animate-spin-slow" : ""}`}>
+          {musicOn ? "🌙" : "🌑"}
+        </span>
+        <span className="hidden sm:inline opacity-70 group-hover:opacity-100 transition-opacity">
+          {musicOn ? "♫" : "off"}
+        </span>
+        {musicOn && (
+          <span className="absolute -top-1 -right-1 w-2 h-2 bg-primary rounded-full animate-pulse" />
+        )}
       </button>
 
       <div className={transitioning ? "animate-fade-screen-out" : "animate-fade-screen-in"}>
