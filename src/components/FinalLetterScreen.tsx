@@ -10,16 +10,15 @@ const FinalLetterScreen = (_props: Props) => {
   const [sparkles, setSparkles] = useState<{x: number;y: number;delay: number;}[]>([]);
   const noRef = useRef<HTMLButtonElement>(null);
 
-  const letterText = `Mi amor,
+  const letterText = `Felices 3 meses mi amor,
 
-Cada día a tu lado es una aventura que no cambiaría por nada. Desde el primer momento supe que eras especial, y cada nivel que pasamos juntos me confirma lo que mi corazón ya sabía.
-
-Gracias por ser mi Player 1, mi compañero de misiones, y la persona que hace que cada día sea extraordinario.
+Cada nivel que pasaste es como cada obstáculo que hemos superado juntos. La distancia, los miedos, los fantasmas del pasado... nada pudo detenernos.
 
 Te amo más de lo que las palabras pueden expresar, y más de lo que cualquier videojuego podría contener.
 
 Con todo mi amor,
-Tu Vale 💕`;
+
+Tu pollito💗`;
 
   const handleNoHover = useCallback(() => {
     if (!noRef.current) return;
