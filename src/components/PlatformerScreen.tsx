@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState, useCallback } from "react";
+import player1Src from "@/assets/player1-novio.png";
 
 interface Props {
   onComplete: () => void;
@@ -7,8 +8,8 @@ interface Props {
 const GRAVITY = 0.5;
 const JUMP_FORCE = -10;
 const SPEED = 4;
-const PLAYER_W = 32;
-const PLAYER_H = 40;
+const PLAYER_W = 40;
+const PLAYER_H = 50;
 const HEART_SIZE = 20;
 const GROUND_Y_OFFSET = 60;
 
@@ -68,6 +69,9 @@ const PlatformerScreen = ({ onComplete }: Props) => {
     if (!canvas) return;
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
+
+    const playerImg = new Image();
+    playerImg.src = player1Src;
 
     const resize = () => {
       canvas.width = canvas.parentElement?.clientWidth || 600;
@@ -163,13 +167,10 @@ const PlatformerScreen = ({ onComplete }: Props) => {
         }
       }
 
-      // Player (simple pixel character)
-      ctx.fillStyle = "hsl(340, 80%, 65%)";
-      ctx.fillRect(g.px, g.py, PLAYER_W, PLAYER_H);
-      ctx.fillStyle = "hsl(25, 60%, 60%)";
-      ctx.fillRect(g.px + 8, g.py + 4, 16, 12);
-      ctx.fillStyle = "hsl(30, 40%, 30%)";
-      ctx.fillRect(g.px + 6, g.py, 20, 8);
+      // Player (sprite image)
+      if (playerImg.complete) {
+        ctx.drawImage(playerImg, g.px, g.py, PLAYER_W, PLAYER_H);
+      }
 
       frame = requestAnimationFrame(loop);
     };
