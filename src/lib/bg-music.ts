@@ -21,91 +21,127 @@ const createReverbIR = (ctx: AudioContext, duration = 2.5, decay = 2.0): AudioBu
   return buffer;
 };
 
-const TEMPO = 56; // very slow, meditative
+const TEMPO = 80; // Ghibli waltz feel – gentle 3/4 time
 const NOTE_DUR = 60 / TEMPO;
 
-// Musical notes (Hz) – using minor/lydian tonalities for night magic
 const N: Record<string, number> = {
-  C3: 130.81, D3: 146.83, Eb3: 155.56, E3: 164.81, F3: 174.61,
-  G3: 196.00, Ab3: 207.65, A3: 220.00, Bb3: 233.08, B3: 246.94,
-  C4: 261.63, D4: 293.66, Eb4: 311.13, E4: 329.63, F4: 349.23,
-  Fs4: 369.99, G4: 392.00, Ab4: 415.30, A4: 440.00, Bb4: 466.16, B4: 493.88,
-  C5: 523.25, D5: 587.33, Eb5: 622.25, E5: 659.25, F5: 698.46,
-  Fs5: 739.99, G5: 783.99, Ab5: 830.61, A5: 880.00, Bb5: 932.33,
-  C6: 1046.50,
+  C3: 130.81, D3: 146.83, E3: 164.81, F3: 174.61, G3: 196.00,
+  A3: 220.00, B3: 246.94,
+  C4: 261.63, D4: 293.66, E4: 329.63, F4: 349.23, G4: 392.00,
+  A4: 440.00, B4: 493.88,
+  C5: 523.25, D5: 587.33, E5: 659.25, F5: 698.46, G5: 783.99,
+  A5: 880.00, B5: 987.77, C6: 1046.50,
   R: 0,
 };
 
-// Main melody – gentle, lullaby-like, major key warmth
+// ── Hisaishi-inspired melody: tender, nostalgic, waltz-like in C major ──
+// Phrase 1: rising hope
 const melody: [string, number][] = [
-  ["G4", 2], ["A4", 1], ["B4", 1], ["D5", 3], ["R", 1],
-  ["C5", 2], ["B4", 1], ["A4", 1], ["G4", 3], ["R", 1],
-  ["A4", 1.5], ["B4", 0.5], ["C5", 2], ["E5", 2], ["D5", 2],
-  ["C5", 1], ["B4", 1], ["A4", 2], ["G4", 2],
+  ["E4", 1], ["G4", 0.5], ["A4", 0.5], ["C5", 2], ["R", 0.5], ["B4", 0.5],
+  ["A4", 1], ["G4", 1], ["E4", 1.5], ["D4", 0.5],
+  ["C4", 2], ["R", 1],
+  // Phrase 2: tender descent
+  ["E5", 1.5], ["D5", 0.5], ["C5", 1], ["A4", 1],
+  ["G4", 1.5], ["A4", 0.5], ["B4", 2],
+  ["R", 1],
+  // Phrase 3: yearning climb
+  ["C5", 1], ["D5", 0.5], ["E5", 0.5], ["G5", 2],
+  ["E5", 1], ["D5", 0.5], ["C5", 0.5], ["A4", 2],
+  ["G4", 1.5], ["E4", 0.5],
+  // Phrase 4: resolution – coming home
+  ["F4", 1], ["E4", 0.5], ["D4", 0.5], ["C4", 2],
+  ["E4", 1], ["G4", 1], ["C5", 3],
   ["R", 2],
-  ["E4", 2], ["G4", 1], ["A4", 1], ["B4", 3], ["R", 1],
-  ["A4", 2], ["G4", 1], ["E4", 1], ["D4", 3], ["R", 1],
-  ["E4", 1.5], ["G4", 0.5], ["A4", 2], ["B4", 2], ["A4", 2],
-  ["G4", 4],
+  // Phrase 5: gentle echo
+  ["A4", 1], ["C5", 0.5], ["B4", 0.5], ["A4", 1], ["G4", 1],
+  ["E4", 1.5], ["D4", 0.5], ["C4", 3],
   ["R", 2],
 ];
 
-// Bass – very slow, warm root notes with gentle movement
+// ── Waltz bass: root-fifth pattern, like a music box ──
 const bass: [string, number][] = [
-  ["G3", 4], ["D3", 4],
-  ["C3", 4], ["G3", 4],
-  ["A3", 4], ["E3", 4],
-  ["D3", 4], ["G3", 4],
-  ["G3", 4], ["D3", 4],
-  ["C3", 4], ["G3", 4],
-  ["A3", 4], ["D3", 4],
-  ["G3", 4], ["R", 4],
+  ["C3", 1.5], ["G3", 0.75], ["E3", 0.75], ["C3", 1.5], ["G3", 0.75], ["E3", 0.75],
+  ["A3", 1.5], ["E3", 0.75], ["C3", 0.75], ["A3", 1.5], ["E3", 0.75], ["C3", 0.75],
+  ["F3", 1.5], ["C3", 0.75], ["A3", 0.75], ["F3", 1.5], ["C3", 0.75], ["A3", 0.75],
+  ["G3", 1.5], ["D3", 0.75], ["B3", 0.75], ["G3", 1.5], ["D3", 0.75], ["B3", 0.75],
+  ["C3", 1.5], ["G3", 0.75], ["E3", 0.75], ["C3", 1.5], ["G3", 0.75], ["E3", 0.75],
+  ["F3", 1.5], ["C3", 0.75], ["A3", 0.75], ["G3", 1.5], ["D3", 0.75], ["B3", 0.75],
+  ["A3", 1.5], ["E3", 0.75], ["C3", 0.75], ["G3", 1.5], ["D3", 0.75], ["B3", 0.75],
+  ["C3", 1.5], ["G3", 0.75], ["E3", 0.75], ["C3", 1.5], ["R", 1.5],
 ];
 
-// Shimmer – very high, barely audible sparkle like distant chimes
-const shimmer: [string, number][] = [
-  ["D5", 3], ["R", 5],
-  ["G5", 3], ["R", 5],
-  ["E5", 3], ["R", 5],
-  ["B4", 3], ["R", 5],
-  ["D5", 3], ["R", 5],
-  ["A5", 3], ["R", 5],
-  ["G5", 3], ["R", 5],
-  ["D5", 3], ["R", 5],
+// ── Counter melody: like a celeste / glockenspiel, high and delicate ──
+const counterMelody: [string, number][] = [
+  ["R", 3], ["G5", 1.5], ["E5", 1.5],
+  ["R", 3], ["C5", 1.5], ["A4", 1.5],
+  ["R", 3], ["A5", 1.5], ["G5", 1.5],
+  ["R", 3], ["E5", 1.5], ["D5", 1.5],
+  ["R", 3], ["G5", 1.5], ["E5", 1.5],
+  ["R", 3], ["A5", 1.5], ["G5", 1.5],
+  ["R", 3], ["C5", 1.5], ["B4", 1.5],
+  ["R", 3], ["E5", 3],
 ];
 
-// Harmony pad – sustained chords, very soft
+// ── Sustained harmony pad – like distant strings ──
 const pad: [string, number][] = [
-  ["B4", 8],
-  ["E4", 8],
-  ["G4", 8],
-  ["Fs4", 8],
-  ["B4", 8],
-  ["E4", 8],
-  ["Fs4", 8],
-  ["G4", 8],
+  ["E4", 6], ["G4", 6],
+  ["C4", 6], ["E4", 6],
+  ["A4", 6], ["C5", 6],
+  ["B4", 6], ["D5", 6],
+  ["E4", 6], ["G4", 6],
+  ["F4", 6], ["A4", 6],
+  ["E4", 6], ["G4", 6],
+  ["C4", 6], ["R", 6],
 ];
 
-const playNote = (
+// Piano-like note with fast attack and natural decay
+const playPianoNote = (
   ctx: AudioContext,
   dest: AudioNode,
   freq: number,
   startTime: number,
   duration: number,
-  type: OscillatorType,
+  volume: number
+) => {
+  if (freq === 0) return;
+  // Two detuned triangle oscillators for warmth
+  for (const detune of [-3, 3]) {
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.type = "triangle";
+    osc.frequency.setValueAtTime(freq, startTime);
+    osc.detune.setValueAtTime(detune, startTime);
+
+    gain.gain.setValueAtTime(0, startTime);
+    gain.gain.linearRampToValueAtTime(volume * 0.5, startTime + 0.01);
+    gain.gain.exponentialRampToValueAtTime(volume * 0.35, startTime + duration * 0.3);
+    gain.gain.exponentialRampToValueAtTime(0.001, startTime + duration);
+
+    osc.connect(gain);
+    gain.connect(dest);
+    osc.start(startTime);
+    osc.stop(startTime + duration + 0.05);
+  }
+};
+
+// Soft sustained note for pads and counter melody
+const playSoftNote = (
+  ctx: AudioContext,
+  dest: AudioNode,
+  freq: number,
+  startTime: number,
+  duration: number,
   volume: number
 ) => {
   if (freq === 0) return;
   const osc = ctx.createOscillator();
   const gain = ctx.createGain();
-  osc.type = type;
+  osc.type = "sine";
   osc.frequency.setValueAtTime(freq, startTime);
 
-  // Very gentle envelope – slow attack, long sustain, smooth fade
-  const attack = Math.min(0.15, duration * 0.15);
   gain.gain.setValueAtTime(0, startTime);
-  gain.gain.linearRampToValueAtTime(volume, startTime + attack);
-  gain.gain.setValueAtTime(volume * 0.7, startTime + duration * 0.6);
+  gain.gain.linearRampToValueAtTime(volume, startTime + 0.12);
+  gain.gain.setValueAtTime(volume * 0.6, startTime + duration * 0.5);
   gain.gain.exponentialRampToValueAtTime(0.001, startTime + duration);
 
   osc.connect(gain);
@@ -117,31 +153,31 @@ const playNote = (
 const scheduleLoop = (ctx: AudioContext, master: GainNode) => {
   const startTime = ctx.currentTime + 0.1;
 
-  // Melody – triangle wave, very soft and warm
+  // Melody – piano-like, warm and clear
   let t = startTime;
   for (const [note, beats] of melody) {
-    playNote(ctx, master, N[note], t, beats * NOTE_DUR * 0.95, "triangle", 0.055);
+    playPianoNote(ctx, master, N[note], t, beats * NOTE_DUR * 0.92, 0.07);
     t += beats * NOTE_DUR;
   }
 
-  // Bass – sine wave, deep and round
+  // Waltz bass – soft sine
   let tb = startTime;
   for (const [note, beats] of bass) {
-    playNote(ctx, master, N[note], tb, beats * NOTE_DUR * 0.9, "sine", 0.04);
+    playSoftNote(ctx, master, N[note], tb, beats * NOTE_DUR * 0.85, 0.035);
     tb += beats * NOTE_DUR;
   }
 
-  // Shimmer – sine, barely there, like tiny bells
-  let ts = startTime;
-  for (const [note, beats] of shimmer) {
-    playNote(ctx, master, N[note], ts, beats * NOTE_DUR * 0.95, "sine", 0.015);
-    ts += beats * NOTE_DUR;
+  // Counter melody – very delicate, like distant bells
+  let tc = startTime;
+  for (const [note, beats] of counterMelody) {
+    playPianoNote(ctx, master, N[note], tc, beats * NOTE_DUR * 0.9, 0.025);
+    tc += beats * NOTE_DUR;
   }
 
-  // Pad – triangle, ultra soft sustained harmony
+  // Harmony pad – ultra-soft sustained strings
   let tp = startTime;
   for (const [note, beats] of pad) {
-    playNote(ctx, master, N[note], tp, beats * NOTE_DUR * 0.98, "triangle", 0.02);
+    playSoftNote(ctx, master, N[note], tp, beats * NOTE_DUR * 0.98, 0.018);
     tp += beats * NOTE_DUR;
   }
 
