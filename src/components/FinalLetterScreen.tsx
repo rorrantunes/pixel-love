@@ -6,7 +6,7 @@ interface Props {}
 const FinalLetterScreen = (_props: Props) => {
   const [opened, setOpened] = useState(false);
   const [answered, setAnswered] = useState(false);
-  const [sparkles, setSparkles] = useState<{ x: number; y: number; delay: number }[]>([]);
+  const [sparkles, setSparkles] = useState<{x: number;y: number;delay: number;}[]>([]);
   const noRef = useRef<HTMLButtonElement>(null);
 
   const letterText = `Mi amor,
@@ -37,7 +37,7 @@ Tu Vale 💕`;
     const newSparkles = Array.from({ length: 30 }, () => ({
       x: Math.random() * 100,
       y: Math.random() * 100,
-      delay: Math.random() * 2,
+      delay: Math.random() * 2
     }));
     setSparkles(newSparkles);
   };
@@ -45,40 +45,40 @@ Tu Vale 💕`;
   if (answered) {
     return (
       <div className="flex flex-col items-center justify-center min-h-screen p-4 animate-fade-screen-in relative z-10 overflow-hidden">
-        {sparkles.map((s, i) => (
-          <div
-            key={i}
-            className="absolute animate-sparkle text-foreground/60"
-            style={{
-              left: `${s.x}%`,
-              top: `${s.y}%`,
-              animationDelay: `${s.delay}s`,
-              fontSize: `${8 + Math.random() * 12}px`,
-            }}
-          >
+        {sparkles.map((s, i) =>
+        <div
+          key={i}
+          className="absolute animate-sparkle text-foreground/60"
+          style={{
+            left: `${s.x}%`,
+            top: `${s.y}%`,
+            animationDelay: `${s.delay}s`,
+            fontSize: `${8 + Math.random() * 12}px`
+          }}>
+
             ✦
           </div>
-        ))}
+        )}
         <img src={bouquet} alt="Ramo de flores" className="w-48 sm:w-64 animate-float mb-8" />
         <p className="font-pixel text-xs sm:text-sm text-primary text-glow-pink text-center max-w-md leading-relaxed">
           Estas flores nunca se marchitarán como mi amor por ti.
         </p>
-        <p className="font-pixel text-[10px] text-foreground/40 mt-8">💕 Pixel Love – Fin 💕</p>
-      </div>
-    );
+        
+      </div>);
+
   }
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen p-4 animate-fade-screen-in relative z-10">
-      {!opened ? (
-        <div
-          onClick={() => setOpened(true)}
-          className="cursor-pointer animate-float text-8xl select-none hover:scale-110 transition-transform"
-        >
+      {!opened ?
+      <div
+        onClick={() => setOpened(true)}
+        className="cursor-pointer animate-float text-8xl select-none hover:scale-110 transition-transform">
+
           💌
-        </div>
-      ) : (
-        <div className="bg-card/90 border border-border rounded-lg p-6 sm:p-8 max-w-lg w-full animate-fade-screen-in backdrop-blur-sm">
+        </div> :
+
+      <div className="bg-card/90 border border-border rounded-lg p-6 sm:p-8 max-w-lg w-full animate-fade-screen-in backdrop-blur-sm">
           <pre className="font-pixel text-[8px] sm:text-[10px] text-foreground/80 whitespace-pre-wrap leading-relaxed mb-8">
             {letterText}
           </pre>
@@ -89,24 +89,24 @@ Tu Vale 💕`;
 
           <div className="relative flex justify-center gap-6 min-h-[80px]">
             <button
-              onClick={handleYes}
-              className="font-pixel text-sm px-8 py-3 bg-primary text-primary-foreground rounded-lg animate-pulse-glow z-10"
-            >
+            onClick={handleYes}
+            className="font-pixel text-sm px-8 py-3 bg-primary text-primary-foreground rounded-lg animate-pulse-glow z-10">
+
               Sí
             </button>
             <button
-              ref={noRef}
-              onMouseEnter={handleNoHover}
-              onTouchStart={handleNoHover}
-              className="font-pixel text-sm px-8 py-3 bg-secondary text-secondary-foreground rounded-lg border border-border transition-all z-10"
-            >
+            ref={noRef}
+            onMouseEnter={handleNoHover}
+            onTouchStart={handleNoHover}
+            className="font-pixel text-sm px-8 py-3 bg-secondary text-secondary-foreground rounded-lg border border-border transition-all z-10">
+
               No
             </button>
           </div>
         </div>
-      )}
-    </div>
-  );
+      }
+    </div>);
+
 };
 
 export default FinalLetterScreen;
