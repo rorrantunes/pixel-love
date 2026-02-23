@@ -1,5 +1,6 @@
-import { useState, useRef, useCallback, useEffect } from "react";
+import { useState, useRef, useCallback } from "react";
 import bouquet from "@/assets/bouquet.png";
+import { retroSounds } from "@/lib/retro-sounds";
 
 interface Props {}
 
@@ -22,6 +23,7 @@ Tu Vale 💕`;
 
   const handleNoHover = useCallback(() => {
     if (!noRef.current) return;
+    retroSounds.wrong();
     const btn = noRef.current;
     const parent = btn.parentElement;
     if (!parent) return;
@@ -33,6 +35,7 @@ Tu Vale 💕`;
   }, []);
 
   const handleYes = () => {
+    retroSounds.celebration();
     setAnswered(true);
     const newSparkles = Array.from({ length: 30 }, () => ({
       x: Math.random() * 100,
@@ -46,16 +49,16 @@ Tu Vale 💕`;
     return (
       <div className="flex flex-col items-center justify-center min-h-screen p-4 animate-fade-screen-in relative z-10 overflow-hidden">
         {sparkles.map((s, i) =>
-        <div
-          key={i}
-          className="absolute animate-sparkle text-foreground/60"
-          style={{
-            left: `${s.x}%`,
-            top: `${s.y}%`,
-            animationDelay: `${s.delay}s`,
-            fontSize: `${8 + Math.random() * 12}px`
-          }}>
-
+          <div
+            key={i}
+            className="absolute animate-sparkle text-foreground/60"
+            style={{
+              left: `${s.x}%`,
+              top: `${s.y}%`,
+              animationDelay: `${s.delay}s`,
+              fontSize: `${8 + Math.random() * 12}px`
+            }}
+          >
             ✦
           </div>
         )}
@@ -63,22 +66,21 @@ Tu Vale 💕`;
         <p className="font-pixel text-xs sm:text-sm text-primary text-glow-pink text-center max-w-md leading-relaxed">
           Estas flores nunca se marchitarán como mi amor por ti.
         </p>
-        
-      </div>);
-
+      </div>
+    );
   }
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen p-4 animate-fade-screen-in relative z-10">
-      {!opened ?
-      <div
-        onClick={() => setOpened(true)}
-        className="cursor-pointer animate-float text-8xl select-none hover:scale-110 transition-transform">
-
+      {!opened ? (
+        <div
+          onClick={() => { retroSounds.reveal(); setOpened(true); }}
+          className="cursor-pointer animate-float text-8xl select-none hover:scale-110 transition-transform"
+        >
           💌
-        </div> :
-
-      <div className="bg-card/90 border border-border rounded-lg p-6 sm:p-8 max-w-lg w-full animate-fade-screen-in backdrop-blur-sm">
+        </div>
+      ) : (
+        <div className="bg-card/90 border border-border rounded-lg p-6 sm:p-8 max-w-lg w-full animate-fade-screen-in backdrop-blur-sm">
           <pre className="font-pixel text-[8px] sm:text-[10px] text-foreground/80 whitespace-pre-wrap leading-relaxed mb-8">
             {letterText}
           </pre>
@@ -89,24 +91,24 @@ Tu Vale 💕`;
 
           <div className="relative flex justify-center gap-6 min-h-[80px]">
             <button
-            onClick={handleYes}
-            className="font-pixel text-sm px-8 py-3 bg-primary text-primary-foreground rounded-lg animate-pulse-glow z-10">
-
+              onClick={handleYes}
+              className="font-pixel text-sm px-8 py-3 bg-primary text-primary-foreground rounded-lg animate-pulse-glow z-10"
+            >
               Sí
             </button>
             <button
-            ref={noRef}
-            onMouseEnter={handleNoHover}
-            onTouchStart={handleNoHover}
-            className="font-pixel text-sm px-8 py-3 bg-secondary text-secondary-foreground rounded-lg border border-border transition-all z-10">
-
+              ref={noRef}
+              onMouseEnter={handleNoHover}
+              onTouchStart={handleNoHover}
+              className="font-pixel text-sm px-8 py-3 bg-secondary text-secondary-foreground rounded-lg border border-border transition-all z-10"
+            >
               No
             </button>
           </div>
         </div>
-      }
-    </div>);
-
+      )}
+    </div>
+  );
 };
 
 export default FinalLetterScreen;

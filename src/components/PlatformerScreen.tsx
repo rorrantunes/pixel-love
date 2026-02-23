@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState, useCallback } from "react";
 import player1Src from "@/assets/player1-novio.png";
+import { retroSounds } from "@/lib/retro-sounds";
 
 interface Props {
   onComplete: () => void;
@@ -103,6 +104,7 @@ const PlatformerScreen = ({ onComplete }: Props) => {
       if ((g.keys[" "] || g.keys["ArrowUp"] || g.keys["w"]) && g.onGround) {
         g.vy = JUMP_FORCE;
         g.onGround = false;
+        retroSounds.jump();
       }
 
       // Physics
@@ -138,6 +140,7 @@ const PlatformerScreen = ({ onComplete }: Props) => {
         ) {
           h.collected = true;
           g.collected++;
+          retroSounds.collect();
           setCollected(g.collected);
           const id = g.nextId++;
           setFloatingTexts((prev) => [...prev, { x: h.x, y: h.y, opacity: 1, id }]);
@@ -145,6 +148,7 @@ const PlatformerScreen = ({ onComplete }: Props) => {
             setFloatingTexts((prev) => prev.filter((t) => t.id !== id));
           }, 1000);
           if (g.collected >= 3) {
+            retroSounds.levelComplete();
             setTimeout(() => onComplete(), 800);
           }
         }
@@ -193,6 +197,7 @@ const PlatformerScreen = ({ onComplete }: Props) => {
     if (g.onGround) {
       g.vy = JUMP_FORCE;
       g.onGround = false;
+      retroSounds.jump();
     }
   };
 

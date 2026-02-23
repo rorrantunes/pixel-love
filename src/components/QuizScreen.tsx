@@ -1,4 +1,5 @@
 import { useState, useCallback } from "react";
+import { retroSounds } from "@/lib/retro-sounds";
 
 interface Props {
   onComplete: () => void;
@@ -32,10 +33,12 @@ const QuizScreen = ({ onComplete }: Props) => {
   const handleAnswer = useCallback(
     (idx: number) => {
       if (selected !== null) return;
+      retroSounds.click();
       setSelected(idx);
       const isCorrect = idx === questions[current].correct;
 
       if (isCorrect) {
+        setTimeout(() => retroSounds.correct(), 150);
         setCorrect(true);
         setTimeout(() => {
           if (current < questions.length - 1) {
@@ -43,14 +46,19 @@ const QuizScreen = ({ onComplete }: Props) => {
             setSelected(null);
             setCorrect(false);
           } else {
+            retroSounds.levelComplete();
             onComplete();
           }
         }, 1000);
       } else {
+        setTimeout(() => retroSounds.wrong(), 150);
         const newLives = lives - 1;
         setLives(newLives);
         if (newLives <= 0) {
-          setTimeout(() => setGameOver(true), 800);
+          setTimeout(() => {
+            retroSounds.gameOver();
+            setGameOver(true);
+          }, 800);
         } else {
           setTimeout(() => {
             setSelected(null);
@@ -62,6 +70,7 @@ const QuizScreen = ({ onComplete }: Props) => {
   );
 
   const restart = () => {
+    retroSounds.click();
     setCurrent(0);
     setLives(3);
     setSelected(null);
@@ -88,7 +97,6 @@ const QuizScreen = ({ onComplete }: Props) => {
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen p-4 animate-fade-screen-in relative z-10">
-      {/* Lives */}
       <div className="absolute top-6 right-6 flex gap-2">
         {Array.from({ length: 3 }).map((_, i) => (
           <span key={i} className={`text-xl ${i < lives ? "opacity-100" : "opacity-20"}`}>

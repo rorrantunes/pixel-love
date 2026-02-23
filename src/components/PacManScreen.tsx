@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState, useCallback } from "react";
 import player1Src from "@/assets/player1-novio.png";
 import player2Src from "@/assets/player2-vale.png";
+import { retroSounds } from "@/lib/retro-sounds";
 
 interface Props {
   onComplete: () => void;
@@ -10,7 +11,6 @@ const CELL = 24;
 const COLS = 19;
 const ROWS = 15;
 
-// 1 = wall, 0 = path, 2 = player start, 3 = goal (Vale), 4 = ghost start
 const MAP: number[][] = [
   [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
   [1,2,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0,0,1],
@@ -49,6 +49,7 @@ const PacManScreen = ({ onComplete }: Props) => {
     moveTimer: 0,
     ghostTimer: 0,
     won: false,
+    lastMoveSound: 0,
   });
 
   const initGame = useCallback(() => {
@@ -113,10 +114,19 @@ const PacManScreen = ({ onComplete }: Props) => {
         else if (g.keys["ArrowLeft"] || g.keys["a"]) nx--;
         else if (g.keys["ArrowRight"] || g.keys["d"]) nx++;
 
-        if (canMove(nx, ny)) { g.px = nx; g.py = ny; }
+        if (canMove(nx, ny) && (nx !== g.px || ny !== g.py)) {
+          g.px = nx; g.py = ny;
+          // Play move sound every few moves to avoid spam
+          g.lastMoveSound++;
+          if (g.lastMoveSound >= 3) {
+            g.lastMoveSound = 0;
+            retroSounds.move();
+          }
+        }
 
         if (MAP[g.py][g.px] === 3) {
           g.won = true;
+          retroSounds.levelComplete();
           setTimeout(() => onComplete(), 600);
         }
       }
@@ -125,7 +135,6 @@ const PacManScreen = ({ onComplete }: Props) => {
       if (g.ghostTimer >= 12) {
         g.ghostTimer = 0;
         for (const ghost of g.ghosts) {
-          // Simple chase AI
           const dx = g.px - ghost.x;
           const dy = g.py - ghost.y;
           let preferred = Math.abs(dx) > Math.abs(dy)
@@ -133,27 +142,28 @@ const PacManScreen = ({ onComplete }: Props) => {
             : (dy > 0 ? 2 : 0);
 
           const tryDirs = [preferred, ...DIRS.map((_,i)=>i).filter(i=>i!==preferred)];
-          let moved = false;
           for (const d of tryDirs) {
-            const nx = ghost.x + DIRS[d][0];
-            const ny = ghost.y + DIRS[d][1];
-            if (canMove(nx, ny)) {
-              ghost.x = nx; ghost.y = ny;
-              moved = true;
+            const nnx = ghost.x + DIRS[d][0];
+            const nny = ghost.y + DIRS[d][1];
+            if (canMove(nnx, nny)) {
+              ghost.x = nnx; ghost.y = nny;
               break;
             }
           }
 
           if (ghost.x === g.px && ghost.y === g.py) {
             caughtRef.current = true;
+            retroSounds.caught();
             setCaught(true);
           }
         }
       }
 
-      // Check collision after player move too
       for (const ghost of g.ghosts) {
         if (ghost.x === g.px && ghost.y === g.py) {
+          if (!caughtRef.current) {
+            retroSounds.caught();
+          }
           caughtRef.current = true;
           setCaught(true);
         }
@@ -170,7 +180,6 @@ const PacManScreen = ({ onComplete }: Props) => {
             ctx.strokeRect(c * CELL, r * CELL, CELL, CELL);
           }
           if (MAP[r][c] === 3) {
-            // Draw Player 2 (Vale) as goal
             if (player2Img.complete) {
               ctx.drawImage(player2Img, c * CELL - 4, r * CELL - 4, CELL + 8, CELL + 8);
             }
@@ -178,12 +187,11 @@ const PacManScreen = ({ onComplete }: Props) => {
         }
       }
 
-      // Player (Player 1 image)
       if (player1Img.complete) {
         ctx.drawImage(player1Img, g.px * CELL - 4, g.py * CELL - 4, CELL + 8, CELL + 8);
       }
 
-      // Ghosts (classic Pac-Man shape)
+      // Ghosts
       for (const ghost of g.ghosts) {
         const gx = ghost.x * CELL + CELL / 2;
         const gy = ghost.y * CELL + CELL / 2;
@@ -191,11 +199,8 @@ const PacManScreen = ({ onComplete }: Props) => {
 
         ctx.fillStyle = ghost.color;
         ctx.beginPath();
-        // Head (semicircle)
         ctx.arc(gx, gy - 2, r, Math.PI, 0);
-        // Body sides
         ctx.lineTo(gx + r, gy + r - 2);
-        // Wavy bottom
         const waves = 3;
         const waveW = (r * 2) / waves;
         for (let i = 0; i < waves; i++) {
@@ -206,7 +211,6 @@ const PacManScreen = ({ onComplete }: Props) => {
         ctx.closePath();
         ctx.fill();
 
-        // Eyes
         ctx.fillStyle = "#fff";
         ctx.beginPath();
         ctx.arc(gx - 3, gy - 3, 3, 0, Math.PI * 2);
@@ -230,7 +234,6 @@ const PacManScreen = ({ onComplete }: Props) => {
     };
   }, [onComplete]);
 
-  // Mobile controls
   const g = gameRef.current;
   const tap = (key: string) => {
     g.keys[key] = true;
@@ -246,7 +249,7 @@ const PacManScreen = ({ onComplete }: Props) => {
         <div className="absolute inset-0 flex flex-col items-center justify-center z-20 bg-background/80">
           <h3 className="font-pixel text-xl text-accent mb-4">¡Te atraparon!</h3>
           <button
-            onClick={initGame}
+            onClick={() => { retroSounds.click(); initGame(); }}
             className="font-pixel text-sm px-6 py-3 bg-primary text-primary-foreground rounded-lg animate-pulse-glow"
           >
             Reintentar
@@ -260,7 +263,6 @@ const PacManScreen = ({ onComplete }: Props) => {
         style={{ maxWidth: "100%", imageRendering: "pixelated" }}
       />
 
-      {/* Mobile controls */}
       <div className="flex flex-col items-center gap-2 mt-4 sm:hidden">
         <button onTouchStart={() => tap("ArrowUp")} className="font-pixel text-lg px-5 py-2 bg-secondary rounded-lg border border-border text-foreground">▲</button>
         <div className="flex gap-4">
