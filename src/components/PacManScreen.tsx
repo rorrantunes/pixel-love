@@ -50,6 +50,10 @@ const PacManScreen = ({ onComplete }: Props) => {
     ghostTimer: 0,
     won: false,
     lastMoveSound: 0,
+    bullets: [] as { x: number; y: number; dx: number; dy: number }[],
+    bulletTimer: 0,
+    lastDir: [1, 0] as [number, number],
+    cooldown: 0,
   });
 
   const initGame = useCallback(() => {
@@ -91,6 +95,12 @@ const PacManScreen = ({ onComplete }: Props) => {
     const onKeyDown = (e: KeyboardEvent) => {
       g.keys[e.key] = true;
       if (["ArrowUp","ArrowDown","ArrowLeft","ArrowRight"].includes(e.key)) e.preventDefault();
+      if ((e.key === " " || e.key === "Enter") && g.cooldown <= 0) {
+        e.preventDefault();
+        g.bullets.push({ x: g.px, y: g.py, dx: g.lastDir[0], dy: g.lastDir[1] });
+        g.cooldown = 15;
+        retroSounds.jump();
+      }
     };
     const onKeyUp = (e: KeyboardEvent) => { g.keys[e.key] = false; };
     window.addEventListener("keydown", onKeyDown);
@@ -109,14 +119,13 @@ const PacManScreen = ({ onComplete }: Props) => {
       if (g.moveTimer >= 8) {
         g.moveTimer = 0;
         let nx = g.px, ny = g.py;
-        if (g.keys["ArrowUp"] || g.keys["w"]) ny--;
-        else if (g.keys["ArrowDown"] || g.keys["s"]) ny++;
-        else if (g.keys["ArrowLeft"] || g.keys["a"]) nx--;
-        else if (g.keys["ArrowRight"] || g.keys["d"]) nx++;
+        if (g.keys["ArrowUp"] || g.keys["w"]) { ny--; g.lastDir = [0, -1]; }
+        else if (g.keys["ArrowDown"] || g.keys["s"]) { ny++; g.lastDir = [0, 1]; }
+        else if (g.keys["ArrowLeft"] || g.keys["a"]) { nx--; g.lastDir = [-1, 0]; }
+        else if (g.keys["ArrowRight"] || g.keys["d"]) { nx++; g.lastDir = [1, 0]; }
 
         if (canMove(nx, ny) && (nx !== g.px || ny !== g.py)) {
           g.px = nx; g.py = ny;
-          // Play move sound every few moves to avoid spam
           g.lastMoveSound++;
           if (g.lastMoveSound >= 3) {
             g.lastMoveSound = 0;
@@ -128,6 +137,28 @@ const PacManScreen = ({ onComplete }: Props) => {
           g.won = true;
           retroSounds.levelComplete();
           setTimeout(() => onComplete(), 600);
+        }
+      }
+
+      // Cooldown
+      if (g.cooldown > 0) g.cooldown--;
+
+      // Move bullets
+      g.bulletTimer++;
+      if (g.bulletTimer >= 4) {
+        g.bulletTimer = 0;
+        for (let i = g.bullets.length - 1; i >= 0; i--) {
+          const b = g.bullets[i];
+          b.x += b.dx;
+          b.y += b.dy;
+          if (!canMove(b.x, b.y)) { g.bullets.splice(i, 1); continue; }
+          // Check ghost hit
+          const hitIdx = g.ghosts.findIndex(gh => gh.x === b.x && gh.y === b.y);
+          if (hitIdx !== -1) {
+            g.ghosts.splice(hitIdx, 1);
+            g.bullets.splice(i, 1);
+            retroSounds.collect();
+          }
         }
       }
 
@@ -223,6 +254,14 @@ const PacManScreen = ({ onComplete }: Props) => {
         ctx.fill();
       }
 
+      // Bullets
+      for (const b of g.bullets) {
+        ctx.fillStyle = "#facc15";
+        ctx.beginPath();
+        ctx.arc(b.x * CELL + CELL / 2, b.y * CELL + CELL / 2, 4, 0, Math.PI * 2);
+        ctx.fill();
+      }
+
       frame = requestAnimationFrame(loop);
     };
     frame = requestAnimationFrame(loop);
@@ -270,9 +309,17 @@ const PacManScreen = ({ onComplete }: Props) => {
           <button onTouchStart={() => tap("ArrowDown")} className="font-pixel text-lg px-5 py-2 bg-secondary rounded-lg border border-border text-foreground">▼</button>
           <button onTouchStart={() => tap("ArrowRight")} className="font-pixel text-lg px-5 py-2 bg-secondary rounded-lg border border-border text-foreground">▶</button>
         </div>
+        <button onTouchStart={() => {
+          const gg = gameRef.current;
+          if (gg.cooldown <= 0) {
+            gg.bullets.push({ x: gg.px, y: gg.py, dx: gg.lastDir[0], dy: gg.lastDir[1] });
+            gg.cooldown = 15;
+            retroSounds.jump();
+          }
+        }} className="font-pixel text-xs px-8 py-2 bg-primary text-primary-foreground rounded-lg mt-1">🔫 Disparar</button>
       </div>
       <p className="font-pixel text-[8px] text-foreground/30 mt-3 hidden sm:block">
-        Flechas para mover · Llega al 💕
+        Flechas para mover · Espacio para disparar · Llega al 💕
       </p>
     </div>
   );
