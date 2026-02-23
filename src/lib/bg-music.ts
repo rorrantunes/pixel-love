@@ -1,57 +1,59 @@
-// Romantic chiptune background music using Web Audio API
+// Nocturnal romantic chiptune – moonlit love theme
 let audioCtx: AudioContext | null = null;
 let isPlaying = false;
 let stopFlag = false;
 let masterGain: GainNode | null = null;
 
-const TEMPO = 108; // BPM
+const TEMPO = 72; // slower, dreamy BPM
 const NOTE_DUR = 60 / TEMPO;
 
-// Musical notes (frequencies in Hz)
+// Musical notes (Hz) – using minor/lydian tonalities for night magic
 const N: Record<string, number> = {
-  C4: 261.63, D4: 293.66, E4: 329.63, F4: 349.23, G4: 392.00,
-  A4: 440.00, B4: 493.88,
-  C5: 523.25, D5: 587.33, E5: 659.25, F5: 698.46, G5: 783.99,
-  A5: 880.00, B5: 987.77,
-  C3: 130.81, D3: 146.83, E3: 164.81, F3: 174.61, G3: 196.00,
-  A3: 220.00, B3: 246.94,
-  R: 0, // rest
+  C3: 130.81, D3: 146.83, Eb3: 155.56, E3: 164.81, F3: 174.61,
+  G3: 196.00, Ab3: 207.65, A3: 220.00, Bb3: 233.08, B3: 246.94,
+  C4: 261.63, D4: 293.66, Eb4: 311.13, E4: 329.63, F4: 349.23,
+  Fs4: 369.99, G4: 392.00, Ab4: 415.30, A4: 440.00, Bb4: 466.16, B4: 493.88,
+  C5: 523.25, D5: 587.33, Eb5: 622.25, E5: 659.25, F5: 698.46,
+  Fs5: 739.99, G5: 783.99, Ab5: 830.61, A5: 880.00, Bb5: 932.33,
+  C6: 1046.50,
+  R: 0,
 };
 
-// Romantic melody (dreamy, magical feel)
+// Main melody – nocturnal, wistful, tender
 const melody: [string, number][] = [
-  ["E4", 1], ["G4", 1], ["A4", 1.5], ["B4", 0.5],
-  ["C5", 1.5], ["B4", 0.5], ["A4", 1], ["G4", 1],
-  ["E4", 1], ["G4", 1], ["A4", 1.5], ["G4", 0.5],
-  ["F4", 1.5], ["E4", 0.5], ["D4", 1], ["R", 1],
-  ["E4", 1], ["G4", 1], ["A4", 1.5], ["B4", 0.5],
-  ["C5", 1], ["D5", 1], ["E5", 1.5], ["D5", 0.5],
-  ["C5", 1], ["B4", 0.5], ["A4", 0.5], ["G4", 1], ["A4", 1],
-  ["R", 0.5], ["E4", 0.5], ["G4", 1], ["A4", 2],
+  ["Eb4", 1.5], ["G4", 0.5], ["Bb4", 2], ["Ab4", 1], ["G4", 1],
+  ["Eb4", 1.5], ["F4", 0.5], ["G4", 2], ["R", 2],
+  ["Ab4", 1.5], ["Bb4", 0.5], ["C5", 2], ["Bb4", 1], ["Ab4", 1],
+  ["G4", 1.5], ["F4", 0.5], ["Eb4", 2], ["R", 2],
+  ["C5", 1.5], ["Bb4", 0.5], ["Ab4", 1], ["G4", 1], ["Eb4", 1.5], ["F4", 0.5],
+  ["G4", 3], ["R", 1],
+  ["Ab4", 1], ["Bb4", 1], ["C5", 1.5], ["Eb5", 0.5],
+  ["D5", 2], ["C5", 1], ["Bb4", 1],
+  ["Ab4", 1.5], ["G4", 0.5], ["Eb4", 2], ["R", 2],
 ];
 
-// Bass line (arpeggiated chords)
+// Bass – slow arpeggios, Cm / Ab / Eb / Bb progression
 const bass: [string, number][] = [
-  ["A3", 1], ["E3", 1], ["A3", 1], ["E3", 1],
-  ["F3", 1], ["C3", 1], ["F3", 1], ["C3", 1],
-  ["D3", 1], ["A3", 1], ["D3", 1], ["A3", 1],
-  ["E3", 1], ["B3", 1], ["E3", 1], ["B3", 1],
-  ["A3", 1], ["E3", 1], ["A3", 1], ["E3", 1],
-  ["F3", 1], ["C3", 1], ["F3", 1], ["C3", 1],
-  ["D3", 1], ["A3", 1], ["D3", 1], ["A3", 1],
-  ["E3", 1], ["B3", 1], ["E3", 1.5], ["R", 0.5],
+  ["C3", 2], ["G3", 2], ["Eb3", 2], ["G3", 2],
+  ["Ab3", 2], ["Eb3", 2], ["Ab3", 2], ["Eb3", 2],
+  ["Bb3", 2], ["F3", 2], ["Bb3", 2], ["F3", 2],
+  ["Eb3", 2], ["Bb3", 2], ["Eb3", 2], ["G3", 2],
+  ["C3", 2], ["G3", 2], ["Eb3", 2], ["G3", 2],
+  ["Ab3", 2], ["Eb3", 2], ["Ab3", 2], ["Eb3", 2],
+  ["Bb3", 2], ["F3", 2], ["Bb3", 2], ["F3", 2],
+  ["Eb3", 2], ["Bb3", 2], ["G3", 2], ["R", 2],
 ];
 
-// Harmony / pad layer
-const harmony: [string, number][] = [
-  ["C5", 2], ["R", 2],
-  ["A4", 2], ["R", 2],
-  ["F4", 2], ["R", 2],
-  ["G4", 2], ["R", 2],
-  ["C5", 2], ["R", 2],
-  ["A4", 2], ["R", 2],
-  ["F4", 2], ["R", 2],
-  ["E4", 2], ["R", 2],
+// Shimmer pad – high ethereal notes like starlight
+const shimmer: [string, number][] = [
+  ["Eb5", 4], ["R", 4],
+  ["C5", 4], ["R", 4],
+  ["Bb4", 4], ["R", 4],
+  ["G4", 4], ["R", 4],
+  ["Eb5", 4], ["R", 4],
+  ["Ab4", 4], ["R", 4],
+  ["Bb4", 4], ["R", 4],
+  ["G4", 4], ["R", 4],
 ];
 
 const playNote = (
@@ -63,16 +65,16 @@ const playNote = (
   type: OscillatorType,
   volume: number
 ) => {
-  if (freq === 0) return; // rest
+  if (freq === 0) return;
   const osc = ctx.createOscillator();
   const gain = ctx.createGain();
   osc.type = type;
   osc.frequency.setValueAtTime(freq, startTime);
 
-  // Gentle envelope
+  // Soft, dreamy envelope with slow attack and long release
   gain.gain.setValueAtTime(0, startTime);
-  gain.gain.linearRampToValueAtTime(volume, startTime + 0.02);
-  gain.gain.setValueAtTime(volume, startTime + duration * 0.7);
+  gain.gain.linearRampToValueAtTime(volume, startTime + 0.08);
+  gain.gain.setValueAtTime(volume * 0.8, startTime + duration * 0.5);
   gain.gain.exponentialRampToValueAtTime(0.001, startTime + duration);
 
   osc.connect(gain);
@@ -84,31 +86,29 @@ const playNote = (
 const scheduleLoop = (ctx: AudioContext, master: GainNode) => {
   const startTime = ctx.currentTime + 0.1;
 
-  // Melody
+  // Melody – triangle for warmth
   let t = startTime;
   for (const [note, beats] of melody) {
-    playNote(ctx, master, N[note], t, beats * NOTE_DUR * 0.9, "triangle", 0.09);
+    playNote(ctx, master, N[note], t, beats * NOTE_DUR * 0.92, "triangle", 0.08);
     t += beats * NOTE_DUR;
   }
 
-  // Bass
+  // Bass – sine for deep, round tone
   let tb = startTime;
   for (const [note, beats] of bass) {
-    playNote(ctx, master, N[note], tb, beats * NOTE_DUR * 0.8, "square", 0.04);
+    playNote(ctx, master, N[note], tb, beats * NOTE_DUR * 0.85, "sine", 0.05);
     tb += beats * NOTE_DUR;
   }
 
-  // Harmony pad
-  let th = startTime;
-  for (const [note, beats] of harmony) {
-    playNote(ctx, master, N[note], th, beats * NOTE_DUR * 0.95, "sine", 0.05);
-    th += beats * NOTE_DUR;
+  // Shimmer pad – sine, very soft, like distant stars
+  let ts = startTime;
+  for (const [note, beats] of shimmer) {
+    playNote(ctx, master, N[note], ts, beats * NOTE_DUR * 0.95, "sine", 0.025);
+    ts += beats * NOTE_DUR;
   }
 
-  // Total loop duration
   const loopDuration = t - startTime;
 
-  // Schedule next loop
   setTimeout(() => {
     if (!stopFlag && isPlaying) {
       scheduleLoop(ctx, master);
